@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>Research Conference Timer</title>
+
+
+<style>
+
+/* =========================
+   GENERAL
+========================= */
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+
+    margin: 0;
+
+    background: #080d19;
+
+    color: white;
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+}
+
+
+/* =========================
+   HEADER
+========================= */
+
+header {
+
+    padding: 22px 30px;
+
+    background: #10172a;
+
+    border-bottom:
+        1px solid #303b58;
+}
+
+header h1 {
+
+    margin: 0;
+
+    font-size: 30px;
+}
+
+.subtitle {
+
+    margin-top: 6px;
+
+    color: #aeb8cc;
+
+    font-size: 16px;
+}
+
+
+/* =========================
+   ROOM GRID
+========================= */
+
+.rooms {
+
+    min-height: calc(100vh - 130px);
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    padding: 30px;
+}
+
+/* =========================
+   ROOM CARD
+========================= */
+
+.room-card {
+
+    width: min(900px, 90vw);
+
+    background: #151d31;
+
+    border:
+        1px solid #303b58;
+
+    border-radius: 20px;
+
+    padding: 40px;
+
+    text-align: center;
+
+}
+
+
+/* =========================
+   ROOM NUMBER
+========================= */
+
+.room-title {
+
+    text-align: left;
+
+    color: #55d8ff;
+
+    font-size: 22px;
+
+    font-weight: bold;
+
+    letter-spacing: 1px;
+}
+
+
+/* =========================
+   INPUTS
+========================= */
+
+.inputs {
+
+    display: grid;
+
+    grid-template-columns:
+        1fr 1fr;
+
+    gap: 8px;
+
+    margin-top: 15px;
+}
+
+input {
+
+    width: 100%;
+
+    padding: 10px;
+
+    background: #1b2540;
+
+    color: white;
+
+    border:
+        1px solid #405071;
+
+    border-radius: 8px;
+
+    font-size: 14px;
+}
+
+
+/* =========================
+   TIMER
+========================= */
+
+.timer {
+
+    margin-top: 35px;
+
+    font-size: 65px;
+
+    font-weight: 900;
+
+    line-height: 1;
+
+    font-variant-numeric:
+        tabular-nums;
+}
+
+
+/* =========================
+   STATUS
+========================= */
+
+.status {
+
+    min-height: 45px;
+
+    margin-top: 15px;
+
+    font-size: 16px;
+
+    font-weight: bold;
+
+    color: #b7c1d5;
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+}
+
+
+/* =========================
+   BUTTONS
+========================= */
+
+.buttons {
+
+    display: grid;
+
+    grid-template-columns:
+        1fr 1fr;
+
+    gap: 8px;
+
+    margin-top: 15px;
+}
+
+button {
+
+    padding: 11px 5px;
+
+    border: none;
+
+    border-radius: 8px;
+
+    color: white;
+
+    font-size: 14px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+}
+
+button:hover {
+
+    filter: brightness(1.2);
+}
+
+
+.start {
+
+    background: #168fd0;
+}
+
+.pause {
+
+    background: #273653;
+}
+
+.stop {
+
+    background: #a52424;
+}
+
+.reset {
+
+    background: #444d63;
+}
+
+
+/* =========================
+   WARNING
+========================= */
+
+.room-card.warning {
+
+    border:
+        3px solid #ff3030;
+
+    box-shadow:
+        0 0 20px
+        rgba(255,48,48,0.25);
+}
+
+.room-card.warning .timer {
+
+    color: #ff3030;
+}
+
+.room-card.warning .status {
+
+    color: #ff3030;
+}
+
+
+/* =========================
+   OVERTIME
+========================= */
+
+.room-card.overtime {
+
+    border:
+        3px solid #ff3030;
+
+    box-shadow:
+        0 0 30px
+        rgba(255,48,48,0.35);
+}
+
+.room-card.overtime .timer {
+
+    color: #ff3030;
+
+    font-size: 58px;
+}
+
+.room-card.overtime .status {
+
+    color: #ff3030;
+}
+
+
+/* =========================
+   STOPPED
+========================= */
+
+.room-card.stopped {
+
+    border:
+        2px solid #777;
+
+    opacity: 0.85;
+}
+
+
+/* =========================
+   FOOTER
+========================= */
+
+.footer {
+
+    text-align: center;
+
+    color: #79859d;
+
+    padding: 10px 20px 20px;
+
+    font-size: 13px;
+}
+
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media(max-width:1200px) {
+
+    .rooms {
+
+        grid-template-columns:
+            repeat(3, 1fr);
+    }
+}
+
+
+@media(max-width:850px) {
+
+    .rooms {
+
+        grid-template-columns:
+            repeat(2, 1fr);
+    }
+}
+
+
+@media(max-width:550px) {
+
+    .rooms {
+
+        grid-template-columns:
+            1fr;
+    }
+
+    .timer {
+
+        font-size: 75px;
+    }
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<!-- =========================
+     HEADER
+========================= -->
+
+<header>
+
+    <h1>
+        Research Conference — Presentation Timer
+    </h1>
+
+    <div class="subtitle">
+
+        10 Rooms • 10 Minutes Per Presentation
+        • 2-Minute Warning • Automatic Overtime
+
+    </div>
+
+</header>
+
+
+<!-- =========================
+     ROOMS
+========================= -->
+
+<div
+    class="rooms"
+    id="rooms">
+</div>
+
+
+<div class="footer">
+
+    Each room operates independently.
+    Start, pause, stop and reset affect
+    only that room.
+
+</div>
+
+
+
+<script>
+
+
+/* ==================================================
+   SETTINGS
+================================================== */
+
+const TOTAL_TIME = 10 * 60;
+
+const WARNING_TIME = 2 * 60;
+
+
+/* ==================================================
+   CREATE 10 INDEPENDENT ROOMS
+================================================== */
+/* Get room number from the URL */
+
+const urlParams =
+    new URLSearchParams(
+        window.location.search
+    );
+
+const roomNumber =
+    parseInt(
+        urlParams.get("room") || "1"
+    );
+
+
+/* Only ONE room */
+
+const rooms = [
+
+    {
+        remaining: TOTAL_TIME,
+
+        running: false,
+
+        stopped: false,
+
+        lastTime: performance.now()
+    }
+
+];
+
+
+/* ==================================================
+   FORMAT TIMER
+================================================== */
+
+function formatTime(
+    seconds,
+    overtime = false
+) {
+
+    seconds =
+        Math.max(
+            0,
+            Math.floor(seconds)
+        );
+
+
+    const minutes =
+        String(
+            Math.floor(seconds / 60)
+        ).padStart(2, "0");
+
+
+    const secs =
+        String(
+            seconds % 60
+        ).padStart(2, "0");
+
+
+    if (overtime) {
+
+        return "+" +
+            minutes +
+            ":" +
+            secs;
+
+    }
+
+
+    return minutes +
+        ":" +
+        secs;
+}
+
+
+/* ==================================================
+   CREATE ROOM HTML
+================================================== */
+
+function createRooms() {
+
+    const container =
+        document.getElementById("rooms");
+
+    const room =
+        rooms[0];
+
+    const number =
+        String(roomNumber)
+        .padStart(2, "0");
+
+
+    container.innerHTML = `
+
+        <div class="room-card" id="room-0">
+
+            <div class="room-title">
+
+                ROOM ${number}
+
+            </div>
+
+
+            <div class="inputs">
+
+                <input
+                    type="text"
+                    placeholder="Research Category"
+                    id="category-0"
+                >
+
+                <input
+                    type="text"
+                    placeholder="Presenter Name"
+                    id="presenter-0"
+                >
+
+            </div>
+
+
+            <div
+                class="timer"
+                id="timer-0"
+            >
+                10:00
+            </div>
+
+
+            <div
+                class="status"
+                id="status-0"
+            >
+                READY
+            </div>
+
+
+            <div class="buttons">
+
+                <button
+                    class="start"
+                    onclick="startRoom(0)"
+                >
+                    ▶ START
+                </button>
+
+
+                <button
+                    class="pause"
+                    onclick="pauseRoom(0)"
+                >
+                    ⏸ PAUSE
+                </button>
+
+
+                <button
+                    class="stop"
+                    onclick="stopRoom(0)"
+                >
+                    ■ STOP
+                </button>
+
+
+                <button
+                    class="reset"
+                    onclick="resetRoom(0)"
+                >
+                    ↻ RESET
+                </button>
+
+            </div>
+
+        </div>
+
+    `;
+}
+
+
+/* ==================================================
+   UPDATE ONE ROOM
+================================================== */
+
+function updateRoom(index) {
+
+    const room =
+        rooms[index];
+
+
+    const card =
+        document.getElementById(
+            "room-" + index
+        );
+
+
+    const timer =
+        document.getElementById(
+            "timer-" + index
+        );
+
+
+    const status =
+        document.getElementById(
+            "status-" + index
+        );
+
+
+    const overtime =
+        room.remaining <= 0;
+
+
+    const warning =
+        room.remaining <= WARNING_TIME &&
+        room.remaining > 0;
+
+
+    /* Remove old classes */
+
+    card.classList.remove(
+        "warning",
+        "overtime",
+        "stopped"
+    );
+
+
+    /* =========================
+       STOPPED
+    ========================= */
+
+    if (room.stopped) {
+
+        card.classList.add(
+            "stopped"
+        );
+
+        status.textContent =
+            "PRESENTATION FINISHED";
+
+    }
+
+
+    /* =========================
+       OVERTIME
+    ========================= */
+
+    else if (overtime) {
+
+        card.classList.add(
+            "overtime"
+        );
+
+        timer.textContent =
+            formatTime(
+                -room.remaining,
+                true
+            );
+
+        status.textContent =
+            "🔴 TIME EXCEEDED";
+
+        return;
+
+    }
+
+
+    /* =========================
+       WARNING
+    ========================= */
+
+    else if (warning) {
+
+        card.classList.add(
+            "warning"
+        );
+
+        status.textContent =
+            "🔴 2 MINUTES REMAINING";
+
+    }
+
+
+    /* =========================
+       RUNNING
+    ========================= */
+
+    else if (room.running) {
+
+        status.textContent =
+            "PRESENTATION IN PROGRESS";
+
+    }
+
+
+    /* =========================
+       PAUSED
+    ========================= */
+
+    else {
+
+        status.textContent =
+            "PAUSED";
+
+    }
+
+
+    timer.textContent =
+        formatTime(
+            room.remaining
+        );
+
+}
+
+
+/* ==================================================
+   START ONE ROOM
+================================================== */
+
+function startRoom(index) {
+
+    const room =
+        rooms[index];
+
+
+    /*
+       If stopped,
+       don't start again.
+    */
+
+    if (room.stopped) {
+
+        return;
+
+    }
+
+
+    room.running =
+        true;
+
+
+    room.lastTime =
+        performance.now();
+
+
+    updateRoom(index);
+
+}
+
+
+/* ==================================================
+   PAUSE ONE ROOM
+================================================== */
+
+function pauseRoom(index) {
+
+    const room =
+        rooms[index];
+
+
+    room.running =
+        false;
+
+
+    updateRoom(index);
+
+}
+
+
+/* ==================================================
+   STOP ONE ROOM
+================================================== */
+
+function stopRoom(index) {
+
+    const room =
+        rooms[index];
+
+
+    room.running =
+        false;
+
+
+    room.stopped =
+        true;
+
+
+    updateRoom(index);
+
+}
+
+
+/* ==================================================
+   RESET ONE ROOM
+================================================== */
+
+function resetRoom(index) {
+
+    rooms[index] = {
+
+        remaining:
+            TOTAL_TIME,
+
+        running:
+            false,
+
+        stopped:
+            false,
+
+        lastTime:
+            performance.now()
+
+    };
+
+
+    updateRoom(index);
+
+}
+
+
+/* ==================================================
+   MAIN TIMER LOOP
+================================================== */
+
+let previousTime =
+    performance.now();
+
+
+function timerLoop(currentTime) {
+
+    const difference =
+        (
+            currentTime -
+            previousTime
+        ) / 1000;
+
+
+    previousTime =
+        currentTime;
+
+
+    rooms.forEach(
+        (room, index) => {
+
+            /*
+               IMPORTANT:
+               Each room is checked separately.
+            */
+
+            if (
+                room.running &&
+                !room.stopped
+            ) {
+
+                room.remaining -=
+                    difference;
+
+
+                updateRoom(index);
+
+            }
+
+        }
+    );
+
+
+    requestAnimationFrame(
+        timerLoop
+    );
+
+}
+
+
+/* ==================================================
+   START APPLICATION
+================================================== */
+
+createRooms();
+
+
+requestAnimationFrame(
+    timerLoop
+);
+
+</script>
+
+
+</body>
+
+</html>
